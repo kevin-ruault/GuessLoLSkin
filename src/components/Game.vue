@@ -9,6 +9,7 @@ const champion = ref<Champions>({
   id: '', name: '', skins: [],
   value: undefined
 });
+const filteredChampions = ref<Champions[]>([]);
 const skin = ref('')
 const answer = ref('')
 const isContinue = ref(true)
@@ -23,9 +24,8 @@ function verifyAnswer () {
   if(answer.value.toLowerCase() === champion.value.name.toLowerCase()) {
     isContinue.value = false
   }
+  answer.value = ''
 }
-
-const filteredChampions = ref<Champions[]>([]);
 
 function filterChampions() {
   filteredChampions.value = props.champions.filter(champ => 
@@ -33,7 +33,7 @@ function filterChampions() {
   );
 }
 
-onMounted(() => {
+function startNewGame() {
   const randomChampion = getRandomElement(props.champions);
   if (randomChampion) {
     champion.value = randomChampion;
@@ -42,12 +42,20 @@ onMounted(() => {
       skin.value = randomSkin;
     }
   }
+  isContinue.value = true
+}
+
+onMounted(() => {
+  startNewGame()
 });
 </script>
 
 <template>
   <div class="game">
     <h2>Guess who ?</h2>
+    <div class="reload">
+      <img @click="startNewGame" src="../assets/reload.svg" alt="reload" width="32">
+    </div>
     <img 
     :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ champion.id + '_' + skin +'.jpg'"
     :alt="skin+'_id'"
@@ -57,7 +65,7 @@ onMounted(() => {
       <input v-model="answer" @input="filterChampions" placeholder="Rechercher un champion" />
       <button @click="verifyAnswer">Valider</button>
     </div>
-    <p>{{ isContinue }}</p>
+    <p v-if="!isContinue">Bien joué !</p>
 
     <div v-if="answer.length > 0">
       <ChampList :filteredChampions="filteredChampions"/>
@@ -75,6 +83,24 @@ onMounted(() => {
 .sub {
   display: flex;
   justify-content: space-between;
+}
+
+.reload {
+  display: flex;
+  justify-content: end;
+}
+
+.reload img {
+  border-radius: 150%;
+  border: 1px solid transparent;
+  padding: 8px;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  }
+
+.reload img:hover {
+  border-color: #646cff;
 }
 
 input {
