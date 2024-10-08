@@ -4,9 +4,32 @@ import { Champions } from "../typescript/ChampionsType";
 const url =
   "https://ddragon.leagueoflegends.com/cdn/14.19.1/data/en_US/champion.json";
 
+const versionUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
+
+async function getVersion() {
+  try {
+    const response = await axios.get(versionUrl);
+    const version = response.data[0];
+    return version;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de la version:", error);
+  }
+}
+
 export async function getChampions() {
   try {
-    const response = await axios.get(url);
+    const version = await getVersion();
+
+    if (!version) {
+      console.error("La version n'a pas pu être récupérée.");
+      return;
+    }
+
+    const response = await axios.get(
+      "https://ddragon.leagueoflegends.com/cdn/" +
+        version +
+        "/data/en_US/champion.json"
+    );
     const championsData = response.data.data;
     let championsList: Champions[] = [];
 
