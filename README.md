@@ -26,7 +26,7 @@ Welcome to the **GuessLoLSkin**, an interactive game built with **Vuejs**. The g
 ## Usage
 
 1.  `npm run start`
-2.  `http://localhost:3000`
+2.  `http://localhost:5173/`
 3.  **How to play**:
 
     - An image of a champion will zoom out with each wrong guess.
