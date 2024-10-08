@@ -16,11 +16,18 @@ const isContinue = ref(true);
 const remainedChampions = ref<Champions[]>(props.champions);
 const proposedChampions = ref<Champions[]>([])
 const inputRef = ref<HTMLInputElement | null>(null);
+const splashartXPos = ref(getRandomNum(-190, 18));
+const splashartYPos = ref(getRandomNum(-16, 16));
+const splashartScale = ref(6);
 
 function getRandomElement<T>(array: T[]): T | undefined {
   if (array.length === 0) return undefined;
   const randomIndex = Math.floor(Math.random() * array.length);
   return array[randomIndex];
+}
+
+function getRandomNum(min: number, max: number) {
+  return Math.random() * (max - min) + min;
 }
 
 function verifyAnswer () {
@@ -42,6 +49,9 @@ function filterChampions() {
 }
 
 function startNewGame() {
+  splashartXPos.value = getRandomNum(-190, 18);
+  splashartYPos.value = getRandomNum(-16, 16);
+  splashartScale.value = 6
   const randomChampion = getRandomElement(props.champions);
   if (randomChampion) {
     champion.value = randomChampion;
@@ -69,9 +79,14 @@ function onClick (selectedChampionName: string) {
   if (selectedChampionName.toLowerCase() === champion.value.name.toLowerCase()) {
     addChampionToProposed(selectedChampionName)
     isContinue.value = false
+    splashartScale.value = 1
+    splashartXPos.value = 0
+    splashartYPos.value = 0
   } else {
     addChampionToProposed(selectedChampionName)
     removeChampionFromSelectable(selectedChampionName)
+    let scale = splashartScale.value;
+    if (scale > 1.2) splashartScale.value = (scale - scale * 0.1);
     forceFocus()
   }
   answer.value = ''
@@ -95,11 +110,17 @@ onMounted(() => {
     <div class="reload">
       <img @click="startNewGame" src="../assets/reload.svg" alt="reload" width="32">
     </div>
-    <img 
-    :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ champion.id + '_' + skin +'.jpg'"
-    :alt="skin+'_id'"
-    width="550"
-    />
+    <div class="zoomed-img">
+      <img 
+      :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ champion.id + '_' + skin +'.jpg'"
+      :alt="skin+'_id'"
+      :class="isContinue ? 'splashart': 'revealed'"
+      :style="{
+        'object-position': splashartXPos + 'px ' + splashartYPos + 'px',
+        'transform': 'scale(' + splashartScale + ')'
+      }"
+      />
+    </div>
     <div class="sub" v-if="isContinue">
       <input v-model="answer" ref="inputRef" @input="filterChampions" placeholder="Rechercher un champion" />
       <button @click="verifyAnswer">Valider</button>
@@ -123,6 +144,41 @@ onMounted(() => {
   flex-direction: column;
   gap: 16px;
   position: relative;
+}
+
+.zoomed-img {
+  margin: 0 auto;
+  min-width: 252px;
+  min-height: 252px;
+  max-width: 252px;
+  max-height: 252px;
+  width: fit-content;
+  height: fit-content;
+  overflow: hidden;
+  border-radius: 8px;
+  border: #1a1a1a 5px solid;
+  display: flex;
+  align-items: center;
+}
+
+.zoomed-img:has(.revealed) {
+  border: 0;
+  border-radius: 0;
+  max-width: 415px;
+  overflow:visible;
+}
+
+.splashart {
+  width: 252px;
+  height: 252px;
+  object-fit: cover;
+}
+
+.revealed{
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  border: #1a1a1a 5px solid;
 }
 
 .sub {
