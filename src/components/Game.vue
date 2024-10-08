@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { getRandomElement, getRandomNum, setFocusOnInput } from '../utils/utils';
 import ChampList from '../components/ChampList.vue';
-import { Champions } from '../App.vue';
+import { Champions } from '../typescript/ChampionsType';
 
 const props = defineProps<{ champions: Champions[] }>();
 

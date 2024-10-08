@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Champions } from '../App.vue';
+import { Champions } from '../typescript/ChampionsType';
 
 defineProps<{ champions: Champions[], isProposed: boolean, champion?: Champions }>();
 
