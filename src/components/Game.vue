@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Champions } from '../App.vue';
 import ChampList from '../components/ChampList.vue';
 
@@ -10,9 +10,11 @@ const champion = ref<Champions>({
   value: undefined
 });
 const filteredChampions = ref<Champions[]>([]);
-const skin = ref('')
-const answer = ref('')
-const isContinue = ref(true)
+const skin = ref('');
+const answer = ref('');
+const isContinue = ref(true);
+const remainedChampions = ref<Champions[]>(props.champions);
+const proposedChampions = ref<Champions[]>([])
 
 function getRandomElement<T>(array: T[]): T | undefined {
   if (array.length === 0) return undefined;
@@ -22,13 +24,17 @@ function getRandomElement<T>(array: T[]): T | undefined {
 
 function verifyAnswer () {
   if(answer.value.toLowerCase() === champion.value.name.toLowerCase()) {
+    addChampionToProposed(answer.value)
     isContinue.value = false
+  } else if (answer.value.toLowerCase() !== champion.value.name.toLowerCase()) {
+    addChampionToProposed(answer.value)
+    removeChampionFromSelectable(answer.value)
   }
   answer.value = ''
 }
 
 function filterChampions() {
-  filteredChampions.value = props.champions.filter(champ => 
+  filteredChampions.value = remainedChampions.value.filter(champ => 
     champ.name.toLowerCase().includes(answer.value.toLowerCase())
   );
 }
@@ -42,7 +48,24 @@ function startNewGame() {
       skin.value = randomSkin;
     }
   }
+  remainedChampions.value = props.champions
+  proposedChampions.value = []
   isContinue.value = true
+}
+
+function addChampionToProposed (name: string) {
+  const champ = remainedChampions.value.filter((champion) => champion.name.toLowerCase() === name.toLowerCase())
+  proposedChampions.value.unshift(champ[0])
+}
+
+function removeChampionFromSelectable (name:string) {
+  remainedChampions.value = remainedChampions.value.filter((champion) => champion.name.toLowerCase() !== name.toLowerCase())
+}
+
+function onClick (event: string) {
+  if (event.toLowerCase() !== champion.value.name.toLowerCase()) {
+    removeChampionFromSelectable(event)
+  }
 }
 
 onMounted(() => {
@@ -67,9 +90,12 @@ onMounted(() => {
     </div>
     <p v-if="!isContinue">Bien joué !</p>
 
-    <div v-if="answer.length > 0">
-      <ChampList :filteredChampions="filteredChampions"/>
+    <div class="selectable" v-if="answer.length > 0">
+      <ChampList :champions="filteredChampions" :isProposed="false"/>
     </div>
+  </div>
+  <div class="proposed">
+    <ChampList :champions="proposedChampions" :isProposed="true" :champion="champion"/>
   </div>
 </template>
 
@@ -78,6 +104,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
 }
 
 .sub {
@@ -88,6 +115,14 @@ onMounted(() => {
 .reload {
   display: flex;
   justify-content: end;
+}
+
+.selectable {
+  position: absolute;
+  width: 100%;
+  top: 102%;
+  left: 0;
+  z-index: 100;
 }
 
 .reload img {
@@ -105,7 +140,7 @@ onMounted(() => {
 
 input {
   height: 45px;
-  width: 400px;
+  width: 280px;
   font-size: 1.5rem;
   padding:0 8px;
 }
