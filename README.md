@@ -19,8 +19,8 @@ Welcome to the **GuessLoLSkin**, an interactive game built with **Vuejs**. The g
 
 ## Installation
 
-1.  `git clone https://github.com/kevin-ruault/GuessLeagueSkin.git `
-2.  `cd GuessLeagueSkin/guesswho`
+1.  `git clone https://github.com/kevin-ruault/GuessLoLSkin.git `
+2.  `cd guessLolSkin`
 3.  `npm install`
 
 ## Usage
