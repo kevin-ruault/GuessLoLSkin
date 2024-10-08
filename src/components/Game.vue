@@ -30,18 +30,6 @@ function getRandomNum(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-function verifyAnswer () {
-  if(answer.value.toLowerCase() === champion.value.name.toLowerCase()) {
-    addChampionToProposed(answer.value)
-    isContinue.value = false
-  } else if (answer.value.toLowerCase() !== champion.value.name.toLowerCase()) {
-    addChampionToProposed(answer.value)
-    removeChampionFromSelectable(answer.value)
-    forceFocus()
-  }
-  answer.value = ''
-}
-
 function filterChampions() {
   filteredChampions.value = remainedChampions.value.filter(champ => 
     champ.name.toLowerCase().includes(answer.value.toLowerCase())
@@ -75,7 +63,7 @@ function removeChampionFromSelectable (name:string) {
   remainedChampions.value = remainedChampions.value.filter((champion) => champion.name.toLowerCase() !== name.toLowerCase())
 }
 
-function onClick (selectedChampionName: string) {
+function verifyAnswer (selectedChampionName: string) {
   if (selectedChampionName.toLowerCase() === champion.value.name.toLowerCase()) {
     addChampionToProposed(selectedChampionName)
     isContinue.value = false
@@ -95,6 +83,13 @@ function onClick (selectedChampionName: string) {
 function forceFocus() {
   if (inputRef.value) {
     inputRef.value.focus();
+  }
+}
+
+function checkValidity() {
+  if (filteredChampions.value.length > 0) {
+    const firstChampionName = filteredChampions.value[0].name;
+    verifyAnswer(firstChampionName);
   }
 }
 
@@ -122,15 +117,15 @@ onMounted(() => {
       />
     </div>
     <div class="sub" v-if="isContinue">
-      <input v-model="answer" ref="inputRef" @input="filterChampions" placeholder="Rechercher un champion" />
-      <button @click="verifyAnswer">Valider</button>
+      <input v-model="answer" ref="inputRef" @input="filterChampions" placeholder="Rechercher un champion" @keydown.enter="checkValidity" />
+      <button @click="checkValidity">Valider</button>
     </div>
     <div v-else>
       <p>GG WP!</p>
     </div>
 
     <div class="selectable" v-if="answer.length > 0">
-      <ChampList :champions="filteredChampions" :isProposed="false" @selectChampion="onClick"/>
+      <ChampList :champions="filteredChampions" :isProposed="false" @selectChampion="verifyAnswer"/>
     </div>
   </div>
   <div class="proposed">

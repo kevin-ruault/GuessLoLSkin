@@ -33,6 +33,9 @@ const emit = defineEmits(['selectChampion']);
     gap: 2px;
     padding: 0;
     max-height: 420px;
+  }
+
+  .selectable {
     overflow-y: scroll;
   }
 
