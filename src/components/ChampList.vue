@@ -5,21 +5,27 @@ defineProps<{ champions: Champions[], isProposed: boolean, champion?: Champions 
 
 const emit = defineEmits(['selectChampion']);
 
+function onClickChampion(championName: string) {
+  emit('selectChampion', championName);
+}
 </script>
 
 <template>
   <ul :class="{ 'selectable' : !isProposed }">
-    <li v-for="(champion, index) in champions" 
-    :key="index" 
-    :class="{'correct': $props.champion?.id === champion.id && isProposed, 
-      'incorrect': $props.champion?.id !== champion.id && isProposed}"
-    @click="emit('selectChampion', champion.name)"
+    <li 
+      v-for="(champion, index) in champions" 
+      :key="index" 
+      :class="{
+        'correct': $props.champion?.id === champion.id && isProposed, 
+        'incorrect': $props.champion?.id !== champion.id && isProposed
+      }"
+      @click="onClickChampion(champion.name)"
     >
       <img
-      :src="'https://ddragon.leagueoflegends.com/cdn/14.19.1/img/champion/' + champion.id +'.png'"
-      :alt="champion.id + '_sprite'"
-      width="40"
-      height="40"
+        :src="'https://ddragon.leagueoflegends.com/cdn/14.19.1/img/champion/' + champion.id +'.png'"
+        :alt="champion.id + '_sprite'"
+        width="40"
+        height="40"
       />
       <p>{{ champion.name }}</p>
     </li>
@@ -39,7 +45,7 @@ const emit = defineEmits(['selectChampion']);
     overflow-y: scroll;
   }
 
-  li{
+  li {
     list-style: none;
     display: flex;
     gap: 16px;
@@ -55,10 +61,6 @@ const emit = defineEmits(['selectChampion']);
     cursor: pointer;
   }
 
-  .proposed {
-    margin-top: 16px;
-  }
-
   .correct {
     background-color: rgb(34, 110, 19);
   }
@@ -66,5 +68,4 @@ const emit = defineEmits(['selectChampion']);
   .incorrect {
     background-color: brown;
   }
-
 </style>

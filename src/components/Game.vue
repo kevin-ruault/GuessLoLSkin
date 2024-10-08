@@ -1,135 +1,126 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { Champions } from '../App.vue';
+import { onMounted, ref } from 'vue';
+import { getRandomElement, getRandomNum, setFocusOnInput } from '../utils/utils';
 import ChampList from '../components/ChampList.vue';
+import { Champions } from '../App.vue';
 
 const props = defineProps<{ champions: Champions[] }>();
 
-const champion = ref<Champions>({
-  id: '', name: '', skins: [],
-  value: undefined
-});
+const currentChampion = ref<Champions>({ id: '', name: '', skins: [], value: undefined });
 const filteredChampions = ref<Champions[]>([]);
-const skin = ref('');
-const answer = ref('');
-const isContinue = ref(true);
-const remainedChampions = ref<Champions[]>(props.champions);
-const proposedChampions = ref<Champions[]>([])
+const currentSkin  = ref('');
+const userInput = ref('');
+const gameInProgress = ref(true);
+const availableChampions = ref<Champions[]>(props.champions);
+const guessedChampions = ref<Champions[]>([]);
 const inputRef = ref<HTMLInputElement | null>(null);
 const splashartXPos = ref(getRandomNum(-190, 18));
 const splashartYPos = ref(getRandomNum(-16, 16));
 const splashartScale = ref(6);
 
-function getRandomElement<T>(array: T[]): T | undefined {
-  if (array.length === 0) return undefined;
-  const randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
-}
-
-function getRandomNum(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
-function filterChampions() {
-  filteredChampions.value = remainedChampions.value.filter(champ => 
-    champ.name.toLowerCase().includes(answer.value.toLowerCase())
+// Filtrer les champions
+function filterAvailableChampions() {
+  filteredChampions.value = availableChampions.value.filter(champ => 
+    champ.name.toLowerCase().includes(userInput.value.toLowerCase())
   );
 }
 
-function startNewGame() {
+// Démarrer un nouveau jeu
+function resetGame() {
   splashartXPos.value = getRandomNum(-190, 18);
   splashartYPos.value = getRandomNum(-16, 16);
-  splashartScale.value = 6
+  splashartScale.value = 6;
+  
   const randomChampion = getRandomElement(props.champions);
   if (randomChampion) {
-    champion.value = randomChampion;
+    currentChampion.value = randomChampion;
     const randomSkin = getRandomElement(randomChampion.skins);
     if (randomSkin) {
-      skin.value = randomSkin;
+      currentSkin .value = randomSkin;
     }
   }
-  remainedChampions.value = props.champions
-  proposedChampions.value = []
-  isContinue.value = true
-  forceFocus()
+  
+  availableChampions.value = props.champions;
+  guessedChampions.value = [];
+  gameInProgress.value = true;
+  setFocusOnInput(inputRef.value);
 }
 
-function addChampionToProposed (name: string) {
-  const champ = remainedChampions.value.filter((champion) => champion.name.toLowerCase() === name.toLowerCase())
-  proposedChampions.value.unshift(champ[0])
+// Ajouter le champion proposé à la liste
+function addChampionToGuessedList(name: string) {
+  const champ = availableChampions.value.find(champ => champ.name.toLowerCase() === name.toLowerCase());
+  if (champ) guessedChampions.value.unshift(champ);
 }
 
-function removeChampionFromSelectable (name:string) {
-  remainedChampions.value = remainedChampions.value.filter((champion) => champion.name.toLowerCase() !== name.toLowerCase())
+// Supprimer un champion de la liste restante
+function removeChampionFromAvailableList(name: string) {
+  availableChampions.value = availableChampions.value.filter(champ => champ.name.toLowerCase() !== name.toLowerCase());
 }
 
-function verifyAnswer (selectedChampionName: string) {
-  if (selectedChampionName.toLowerCase() === champion.value.name.toLowerCase()) {
-    addChampionToProposed(selectedChampionName)
-    isContinue.value = false
-    splashartScale.value = 1
-    splashartXPos.value = 0
-    splashartYPos.value = 0
+// Vérifier la réponse
+function verifyChampionGuess(selectedChampionName: string) {
+  if (selectedChampionName.toLowerCase() === currentChampion.value.name.toLowerCase()) {
+    addChampionToGuessedList(selectedChampionName);
+    gameInProgress.value = false;
+    splashartScale.value = 1;
+    splashartXPos.value = 0;
+    splashartYPos.value = 0;
   } else {
-    addChampionToProposed(selectedChampionName)
-    removeChampionFromSelectable(selectedChampionName)
-    let scale = splashartScale.value;
-    if (scale > 1.2) splashartScale.value = (scale - scale * 0.1);
-    forceFocus()
+    addChampionToGuessedList(selectedChampionName);
+    removeChampionFromAvailableList(selectedChampionName);
+    splashartScale.value = splashartScale.value > 1.2 ? splashartScale.value - splashartScale.value * 0.1 : splashartScale.value;
+    setFocusOnInput(inputRef.value);
   }
-  answer.value = ''
+  userInput.value = '';
 }
 
-function forceFocus() {
-  if (inputRef.value) {
-    inputRef.value.focus();
-  }
-}
-
-function checkValidity() {
-  if (filteredChampions.value.length > 0) {
-    const firstChampionName = filteredChampions.value[0].name;
-    verifyAnswer(firstChampionName);
+// Vérifier la validité à l'entrée
+function checkFirstFilteredChampion() {
+  if (userInput.value.length > 0) {
+    if (filteredChampions.value.length > 0) {
+      const firstChampionName = filteredChampions.value[0].name;
+      verifyChampionGuess(firstChampionName);
+    }
   }
 }
 
 onMounted(() => {
-  startNewGame()
-  forceFocus()
+  resetGame();
+  setFocusOnInput(inputRef.value);
 });
 </script>
 
 <template>
   <div class="game">
-    <h2>Guess who ?</h2>
+    <h2>Guess who?</h2>
     <div class="reload">
-      <img @click="startNewGame" src="../assets/reload.svg" alt="reload" width="32">
+      <img @click="resetGame" src="../assets/reload.svg" alt="reload" width="32">
     </div>
     <div class="zoomed-img">
       <img 
-      :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ champion.id + '_' + skin +'.jpg'"
-      :alt="skin+'_id'"
-      :class="isContinue ? 'splashart': 'revealed'"
-      :style="{
-        'object-position': splashartXPos + 'px ' + splashartYPos + 'px',
-        'transform': 'scale(' + splashartScale + ')'
-      }"
+        :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ currentChampion.id + '_' + currentSkin  +'.jpg'"
+        :alt="currentSkin +'_id'"
+        :class="gameInProgress ? 'splashart': 'revealed'"
+        :style="{
+          'object-position': splashartXPos + 'px ' + splashartYPos + 'px',
+          'transform': 'scale(' + splashartScale + ')'
+        }"
       />
     </div>
-    <div class="sub" v-if="isContinue">
-      <input v-model="answer" ref="inputRef" @input="filterChampions" placeholder="Rechercher un champion" @keydown.enter="checkValidity" />
-      <button @click="checkValidity">Valider</button>
+    <div class="sub" v-if="gameInProgress">
+      <input v-model="userInput" ref="inputRef" @input="filterAvailableChampions" placeholder="Rechercher un champion" @keydown.enter="checkFirstFilteredChampion" />
+      <button @click="checkFirstFilteredChampion">Valider</button>
     </div>
     <div v-else>
       <p>GG WP!</p>
     </div>
 
-    <div class="selectable" v-if="answer.length > 0">
-      <ChampList :champions="filteredChampions" :isProposed="false" @selectChampion="verifyAnswer"/>
+    <div class="selectable" v-if="userInput.length > 0">
+      <ChampList :champions="filteredChampions" :isProposed="false" @selectChampion="verifyChampionGuess"/>
     </div>
   </div>
   <div class="proposed">
-    <ChampList :champions="proposedChampions" :isProposed="true" :champion="champion"/>
+    <ChampList :champions="guessedChampions" :isProposed="true" :champion="currentChampion"/>
   </div>
 </template>
 
@@ -170,7 +161,7 @@ onMounted(() => {
 }
 
 .revealed{
-  width: 100%;
+  width: 98%;
   height: 100%;
   border-radius: 8px;
   border: #1a1a1a 5px solid;
