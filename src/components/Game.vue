@@ -62,10 +62,15 @@ function removeChampionFromSelectable (name:string) {
   remainedChampions.value = remainedChampions.value.filter((champion) => champion.name.toLowerCase() !== name.toLowerCase())
 }
 
-function onClick (event: string) {
-  if (event.toLowerCase() !== champion.value.name.toLowerCase()) {
-    removeChampionFromSelectable(event)
+function onClick (selectedChampionName: string) {
+  if (selectedChampionName.toLowerCase() === champion.value.name.toLowerCase()) {
+    addChampionToProposed(selectedChampionName)
+    isContinue.value = false
+  } else {
+    addChampionToProposed(selectedChampionName)
+    removeChampionFromSelectable(selectedChampionName)
   }
+  answer.value = ''
 }
 
 onMounted(() => {
@@ -84,14 +89,16 @@ onMounted(() => {
     :alt="skin+'_id'"
     width="550"
     />
-    <div class="sub">
+    <div class="sub" v-if="isContinue">
       <input v-model="answer" @input="filterChampions" placeholder="Rechercher un champion" />
       <button @click="verifyAnswer">Valider</button>
     </div>
-    <p v-if="!isContinue">Bien joué !</p>
+    <div v-else>
+      <p>GG WP!</p>
+    </div>
 
     <div class="selectable" v-if="answer.length > 0">
-      <ChampList :champions="filteredChampions" :isProposed="false"/>
+      <ChampList :champions="filteredChampions" :isProposed="false" @selectChampion="onClick"/>
     </div>
   </div>
   <div class="proposed">

@@ -2,6 +2,9 @@
 import { Champions } from '../App.vue';
 
 defineProps<{ champions: Champions[], isProposed: boolean, champion?: Champions }>();
+
+const emit = defineEmits(['selectChampion']);
+
 </script>
 
 <template>
@@ -10,6 +13,7 @@ defineProps<{ champions: Champions[], isProposed: boolean, champion?: Champions 
     :key="index" 
     :class="{'correct': $props.champion?.id === champion.id && isProposed, 
       'incorrect': $props.champion?.id !== champion.id && isProposed}"
+    @click="emit('selectChampion', champion.name)"
     >
       <img
       :src="'https://ddragon.leagueoflegends.com/cdn/14.19.1/img/champion/' + champion.id +'.png'"
