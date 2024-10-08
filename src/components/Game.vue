@@ -15,6 +15,7 @@ const answer = ref('');
 const isContinue = ref(true);
 const remainedChampions = ref<Champions[]>(props.champions);
 const proposedChampions = ref<Champions[]>([])
+const inputRef = ref<HTMLInputElement | null>(null);
 
 function getRandomElement<T>(array: T[]): T | undefined {
   if (array.length === 0) return undefined;
@@ -29,6 +30,7 @@ function verifyAnswer () {
   } else if (answer.value.toLowerCase() !== champion.value.name.toLowerCase()) {
     addChampionToProposed(answer.value)
     removeChampionFromSelectable(answer.value)
+    forceFocus()
   }
   answer.value = ''
 }
@@ -51,6 +53,7 @@ function startNewGame() {
   remainedChampions.value = props.champions
   proposedChampions.value = []
   isContinue.value = true
+  forceFocus()
 }
 
 function addChampionToProposed (name: string) {
@@ -69,12 +72,20 @@ function onClick (selectedChampionName: string) {
   } else {
     addChampionToProposed(selectedChampionName)
     removeChampionFromSelectable(selectedChampionName)
+    forceFocus()
   }
   answer.value = ''
 }
 
+function forceFocus() {
+  if (inputRef.value) {
+    inputRef.value.focus();
+  }
+}
+
 onMounted(() => {
   startNewGame()
+  forceFocus()
 });
 </script>
 
@@ -90,7 +101,7 @@ onMounted(() => {
     width="550"
     />
     <div class="sub" v-if="isContinue">
-      <input v-model="answer" @input="filterChampions" placeholder="Rechercher un champion" />
+      <input v-model="answer" ref="inputRef" @input="filterChampions" placeholder="Rechercher un champion" />
       <button @click="verifyAnswer">Valider</button>
     </div>
     <div v-else>
