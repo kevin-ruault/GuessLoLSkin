@@ -18,14 +18,12 @@ const splashartXPos = ref(getRandomNum(-190, 18));
 const splashartYPos = ref(getRandomNum(-16, 16));
 const splashartScale = ref(6);
 
-// Filtrer les champions
 function filterAvailableChampions() {
   filteredChampions.value = availableChampions.value.filter(champ => 
     champ.name.toLowerCase().includes(userInput.value.toLowerCase())
   );
 }
 
-// Démarrer un nouveau jeu
 function resetGame() {
   splashartXPos.value = getRandomNum(-190, 18);
   splashartYPos.value = getRandomNum(-16, 16);
@@ -46,18 +44,15 @@ function resetGame() {
   setFocusOnInput(inputRef.value);
 }
 
-// Ajouter le champion proposé à la liste
 function addChampionToGuessedList(name: string) {
   const champ = availableChampions.value.find(champ => champ.name.toLowerCase() === name.toLowerCase());
   if (champ) guessedChampions.value.unshift(champ);
 }
 
-// Supprimer un champion de la liste restante
 function removeChampionFromAvailableList(name: string) {
   availableChampions.value = availableChampions.value.filter(champ => champ.name.toLowerCase() !== name.toLowerCase());
 }
 
-// Vérifier la réponse
 function verifyChampionGuess(selectedChampionName: string) {
   if (selectedChampionName.toLowerCase() === currentChampion.value.name.toLowerCase()) {
     addChampionToGuessedList(selectedChampionName);
@@ -74,7 +69,6 @@ function verifyChampionGuess(selectedChampionName: string) {
   userInput.value = '';
 }
 
-// Vérifier la validité à l'entrée
 function checkFirstFilteredChampion() {
   if (userInput.value.length > 0) {
     if (filteredChampions.value.length > 0) {

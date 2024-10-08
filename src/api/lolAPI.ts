@@ -1,9 +1,6 @@
 import axios from "axios";
 import { Champions } from "../typescript/ChampionsType";
 
-const url =
-  "https://ddragon.leagueoflegends.com/cdn/14.19.1/data/en_US/champion.json";
-
 const versionUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
 
 async function getVersion() {
@@ -26,9 +23,7 @@ export async function getChampions() {
     }
 
     const response = await axios.get(
-      "https://ddragon.leagueoflegends.com/cdn/" +
-        version +
-        "/data/en_US/champion.json"
+      `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
     );
     const championsData = response.data.data;
     let championsList: Champions[] = [];
