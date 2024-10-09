@@ -17,6 +17,7 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const splashartXPos = ref(getRandomNum(-190, 18));
 const splashartYPos = ref(getRandomNum(-16, 16));
 const splashartScale = ref(6);
+const loading = ref(true)
 
 function filterAvailableChampions() {
   filteredChampions.value = availableChampions.value.filter(champ => 
@@ -25,6 +26,7 @@ function filterAvailableChampions() {
 }
 
 function resetGame() {
+  loading.value = true
   splashartXPos.value = getRandomNum(-190, 18);
   splashartYPos.value = getRandomNum(-16, 16);
   splashartScale.value = 6;
@@ -42,6 +44,7 @@ function resetGame() {
   guessedChampions.value = [];
   gameInProgress.value = true;
   setFocusOnInput(inputRef.value);
+  setTimeout(() => loading.value = false, 1000)
 }
 
 function addChampionToGuessedList(name: string) {
@@ -91,7 +94,8 @@ onMounted(() => {
       <img @click="resetGame" src="../assets/reload.svg" alt="reload" width="32">
     </div>
     <div class="zoomed-img">
-      <img 
+    <h2 v-if="loading">Chargement...</h2>
+      <img v-else
         :src="'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+ currentChampion.id + '_' + currentSkin  +'.jpg'"
         :alt="currentSkin +'_id'"
         :class="gameInProgress ? 'splashart': 'revealed'"
@@ -139,6 +143,7 @@ onMounted(() => {
   border: #1a1a1a 5px solid;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .zoomed-img:has(.revealed) {
