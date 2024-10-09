@@ -9,7 +9,7 @@ async function getVersion() {
     const version = response.data[0];
     return version;
   } catch (error) {
-    console.error("Erreur lors de la récupération de la version:", error);
+    console.error("Error retrieving the version:", error);
   }
 }
 
@@ -18,7 +18,7 @@ export async function getChampions() {
     const version = await getVersion();
 
     if (!version) {
-      console.error("La version n'a pas pu être récupérée.");
+      console.error("The version could not be retrieved.");
       return;
     }
 
@@ -62,6 +62,6 @@ export async function getChampions() {
     await Promise.all(promises);
     return championsList;
   } catch (error) {
-    console.error("Erreur lors de la récupération des champions:", error);
+    console.error("Error retrieving champions:", error);
   }
 }

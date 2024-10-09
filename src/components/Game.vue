@@ -18,6 +18,7 @@ const splashartXPos = ref(getRandomNum(-190, 18));
 const splashartYPos = ref(getRandomNum(-16, 16));
 const splashartScale = ref(6);
 const loading = ref(true)
+const surrended = ref(false)
 
 function filterAvailableChampions() {
   filteredChampions.value = availableChampions.value.filter(champ => 
@@ -30,7 +31,7 @@ function resetGame() {
   splashartXPos.value = getRandomNum(-190, 18);
   splashartYPos.value = getRandomNum(-16, 16);
   splashartScale.value = 6;
-  
+  surrended.value = false;
   const randomChampion = getRandomElement(props.champions);
   if (randomChampion) {
     currentChampion.value = randomChampion;
@@ -81,6 +82,16 @@ function checkFirstFilteredChampion() {
   }
 }
 
+
+function surrender() {
+  surrended.value = true;
+  gameInProgress.value = false;
+  splashartScale.value = 1;
+  splashartXPos.value = 0;
+  splashartYPos.value = 0;
+  addChampionToGuessedList(currentChampion.value.name);
+}
+
 onMounted(() => {
   resetGame();
   setFocusOnInput(inputRef.value);
@@ -91,6 +102,7 @@ onMounted(() => {
   <div class="game">
     <h2>Guess who?</h2>
     <div class="reload">
+      <button v-if="gameInProgress" @click="surrender">Surrender</button>
       <img @click="resetGame" src="../assets/reload.svg" alt="reload" width="32">
     </div>
     <div class="zoomed-img">
@@ -106,11 +118,18 @@ onMounted(() => {
       />
     </div>
     <div class="sub" v-if="gameInProgress">
-      <input v-model="userInput" ref="inputRef" @input="filterAvailableChampions" placeholder="Rechercher un champion" @keydown.enter="checkFirstFilteredChampion" />
-      <button @click="checkFirstFilteredChampion">Valider</button>
+      <input v-model="userInput" ref="inputRef" @input="filterAvailableChampions" placeholder="Search for a champion" @keydown.enter="checkFirstFilteredChampion" />
+      <button @click="checkFirstFilteredChampion">Confirm</button>
     </div>
-    <div v-else>
-      <p>GG WP!</p>
+    <div v-else-if="!gameInProgress && !surrended" class="sub">
+      <h3>GG WP!</h3>
+      <button @click="resetGame">Play again</button>
+      <h3>GG WP!</h3>
+    </div>
+    <div v-else class="sub">
+      <h3>FF 15</h3>
+      <button @click="resetGame">Try again</button>
+      <h3>FF 15</h3>
     </div>
 
     <div class="selectable" v-if="userInput.length > 0">
@@ -174,6 +193,7 @@ onMounted(() => {
 .reload {
   display: flex;
   justify-content: end;
+  gap: 16px;
 }
 
 .selectable {
