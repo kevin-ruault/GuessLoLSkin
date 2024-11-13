@@ -30,7 +30,7 @@ export async function getChampions() {
 
     const promises = Object.keys(championsData).map(async (key) => {
       const champResponse = await axios.get(
-        `https://ddragon.leagueoflegends.com/cdn/14.19.1/data/en_US/champion/${championsData[key].id}.json`
+        `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion/${championsData[key].id}.json`
       );
       const champSkins: any = [];
 
